@@ -34,11 +34,11 @@ const userSchema = new Schema(
         },
         watchHistory: [
             {
-                type : Schema.Types.objectId,
+                type : Schema.Types.ObjectId,
                 ref: "video"
             }
         ],
-        passowrd: {
+        password: {
             type: String,
             required: [true, 'password is required']
         },
@@ -50,9 +50,9 @@ const userSchema = new Schema(
 )
 
 userSchema.pre("save", async function (next) {
-    if (this.isModified("password")) return next()
+    if (!this.isModified("password")) return next()
 
-    this.passowrd = await bcrypt.hash(this.passowrd, 10)
+    this.passowrd = await bcrypt.hash(this.password, 10)
     next()
 })
 
@@ -61,7 +61,7 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 }
 
 userSchema.methods.generateAccessToken = function () {
-    jwt.sign(
+    return jwt.sign(
         {
            _id: this._id,
            email: this.email,
@@ -70,7 +70,7 @@ userSchema.methods.generateAccessToken = function () {
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
-            expiredIn: process.env.ACCESS_TOKEN_EXPIRY
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
         }
     )
 }
@@ -82,7 +82,7 @@ userSchema.methods.generateRefreshToken = function () {
         },
         process.env.REFRESH_TOKEN,
         {
-            expiredIn: process.env.REFRESH_TOKEN_EXPIRY
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         }
     )
 }
