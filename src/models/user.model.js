@@ -52,12 +52,13 @@ const userSchema = new Schema(
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next()
 
-    this.passowrd = await bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
+    
     next()
 })
 
 userSchema.methods.isPasswordCorrect = async function (password) {
-    return await bcrypt.compare(password, this.isPasswordCorrect)
+    return await bcrypt.compare(password, this.password)
 }
 
 userSchema.methods.generateAccessToken = function () {
@@ -80,7 +81,7 @@ userSchema.methods.generateRefreshToken = function () {
         {
            _id: this._id,
         },
-        process.env.REFRESH_TOKEN,
+        process.env.REFRESH_TOKEN_SECRET,
         {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         }
